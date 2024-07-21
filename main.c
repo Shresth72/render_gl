@@ -100,14 +100,15 @@ void setupBuffers() {
   glBindVertexArray(0);
 }
 
+FT_Library ft;
+FT_Face face;
+
 void initFreeType() {
-  FT_Library ft;
   if (FT_Init_FreeType(&ft)) {
     printf("error: freetype: could not init FreeType Library\n");
     return;
   }
 
-  FT_Face face;
   if (FT_New_Face(ft, "/home/shrestha/.fonts/Inter-Bold.ttf", 0, &face)) {
     printf("error: freetype: failed to load font\n");
     return;
@@ -170,16 +171,14 @@ void renderText(const char *text, float x, float y, float scale,
         {xpos + w, ypos, 1.0f, 1.0f}, {xpos + w, ypos + h, 1.0f, 0.0f},
     };
 
-    // Render glyph texture over quad
     glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-    // Update content of VBO memory
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // Render quad
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    // Advance cursors for next glyph
+
     x += (ch.Advance >> 6) * scale;
   }
 
@@ -199,30 +198,20 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Create a windowed mode window and its OpenGL context
-  window = glfwCreateWindow(winw, winh, "Shader", NULL, NULL);
+  window = glfwCreateWindow(winw, winh, "Text Rendering", NULL, NULL);
   if (!window) {
     glfwTerminate();
     return -1;
   }
-
-  // Make the window's context current
   glfwMakeContextCurrent(window);
   if (glewInit() != GLEW_OK) {
     printf("Error initializing GLEW\n");
     return -1;
   }
 
-  printf("%s\n", glGetString(GL_VERSION));
-
-  // Setup Buffers
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glBindVertexArray(VAO);
-
   shaderProgram = createShader(vertexShaderSource, fragmentShaderSource);
   glUseProgram(shaderProgram);
 
-  // Set orthographic projection matrix
   projectionLoc = glGetUniformLocation(shaderProgram, "projection");
   mat4x4 projection;
   mat4x4_ortho(projection, 0.0f, winw, 0.0f, winh, -1.0f, 1.0f);
@@ -230,15 +219,10 @@ int main(void) {
 
   textColorLoc = glGetUniformLocation(shaderProgram, "textColor");
 
-  // Initialize FreeType
+  setupBuffers();
   initFreeType();
 
-  // Setup buffers
-  setupBuffers();
-
-  // Loop until the user closes the window
   while (!glfwWindowShouldClose(window)) {
-    // Render here
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
@@ -246,16 +230,15 @@ int main(void) {
     snprintf(buffer, sizeof(buffer), "Render This Text");
     float color[3] = {0.5f, 0.8f, 0.2f};
 
+    FT_Set_Pixel_Sizes(face, 0, 48);
     renderText(buffer, 10.0f, winh - 50.0f, 1.0f, color);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  // Cleanup
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
-
   glfwTerminate();
   return 0;
 }
