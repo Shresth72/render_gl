@@ -1,10 +1,22 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <freetype2/ft2build.h>
-#include FT_FREETYPE_H
-#include "linmath.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include FT_FREETYPE_H
+#include "linmath.h"
+
+GLuint VAO, VBO, shaderProgram, projectionLoc, textColorLoc;
+static int winw = 1280, winh = 720;
+
+struct Character {
+  GLuint TextureID;
+  int Size[2];
+  int Bearing[2];
+  GLuint Advance;
+};
+struct Character Characters[128];
 
 // Shader sources
 const char *vertexShaderSource =
@@ -30,118 +42,48 @@ const char *fragmentShaderSource =
     "    color = vec4(textColor, 1.0) * sampled;\n"
     "}\n\0";
 
-#define WIN_MARGIN 20.0f
+static unsigned int compileShader(unsigned int type, const char *source) {
+  unsigned int id = glCreateShader(type);
+  glShaderSource(id, 1, &source, NULL);
+  glCompileShader(id);
 
-static int winw = 1280, winh = 720;
-static int frame_count = 0;
+  int result = 0;
+  glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
-struct Character {
-  GLuint TextureID;
-  int Size[2];
-  int Bearing[2];
-  GLuint Advance;
-};
-struct Character Characters[128];
+  if (result == GL_FALSE) {
+    int length = 0;
+    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+    char *message = (char *)alloca(length);
+    glGetShaderInfoLog(id, length, &length, message);
 
-GLuint VAO, VBO, shaderProgram, projectionLoc, textColorLoc;
+    printf("Failed to compile %s shader\n",
+           (type == GL_VERTEX_SHADER) ? "vertex" : "fragment");
+    printf("%s\n", message);
 
-// Compiler and link the shaderProgram
-GLuint setupShaders() {
-  GLuint vertexShader, fragmentShader;
-
-  // Vertex Shader
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  GLint success;
-  GLchar infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    printf("error: shader: vertex compilation failed\n%s\n", infoLog);
+    glDeleteShader(id);
+    return 0; // Return 0 to indicate failure
   }
 
-  // Fragment Shader
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    printf("error: shader: fragment compilation failed\n%s\n", infoLog);
-  }
-
-  // Shader Program
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    printf("error: shader: program linking failed\n%s\n", infoLog);
-  }
-
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  return shaderProgram;
+  return id;
 }
 
-// Inittialize FreeType and Load Font
-void initFreeType() {
-  FT_Library ft;
-  if (FT_Init_FreeType(&ft)) {
-    printf("error: freetype: could not init FreeType Library\n");
-    return;
-  }
+static unsigned int createShader(const char *vertexShaderSource,
+                                 const char *fragmentShaderSource) {
+  unsigned int program = glCreateProgram();
+  unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+  unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-  FT_Face face;
-  if (FT_New_Face(ft, "/home/shrestha/.fonts/Inter-Bold.ttf", 0, &face)) {
-    printf("error: freetype: failed to load font\n");
-    return;
-  }
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+  glLinkProgram(program);
+  glValidateProgram(program);
 
-  FT_Set_Pixel_Sizes(face, 0, 48);
+  glDeleteShader(vs);
+  glDeleteShader(fs);
 
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-  // Load character glyphs
-  for (unsigned char c = 0; c < 128; c++) {
-    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-      printf("error: freetype: failed to load glyph\n");
-      continue;
-    }
-
-    // Generate texture
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
-                 face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
-                 face->glyph->bitmap.buffer);
-
-    // Set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Store character for later use
-    struct Character character = {
-        texture,
-        {face->glyph->bitmap.width, face->glyph->bitmap.rows},
-        {face->glyph->bitmap_left, face->glyph->bitmap_top},
-        (GLuint)face->glyph->advance.x};
-    Characters[c] = character;
-  }
-
-  FT_Done_Face(face);
-  FT_Done_FreeType(ft);
+  return program;
 }
 
-// Setup vertex data and buffer and confihure vertex attributes
 void setupBuffers() {
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
@@ -158,7 +100,52 @@ void setupBuffers() {
   glBindVertexArray(0);
 }
 
-// Render text
+void initFreeType() {
+  FT_Library ft;
+  if (FT_Init_FreeType(&ft)) {
+    printf("error: freetype: could not init FreeType Library\n");
+    return;
+  }
+
+  FT_Face face;
+  if (FT_New_Face(ft, "/home/shrestha/.fonts/Inter-Bold.ttf", 0, &face)) {
+    printf("error: freetype: failed to load font\n");
+    return;
+  }
+
+  FT_Set_Pixel_Sizes(face, 0, 48);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  for (unsigned char c = 0; c < 128; c++) {
+    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+      printf("error: freetype: failed to load glyph\n");
+      continue;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width,
+                 face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE,
+                 face->glyph->bitmap.buffer);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    struct Character character = {
+        texture,
+        {face->glyph->bitmap.width, face->glyph->bitmap.rows},
+        {face->glyph->bitmap_left, face->glyph->bitmap_top},
+        (GLuint)face->glyph->advance.x};
+    Characters[c] = character;
+  }
+
+  FT_Done_Face(face);
+  FT_Done_FreeType(ft);
+}
+
 void renderText(const char *text, float x, float y, float scale,
                 float color[3]) {
   glUseProgram(shaderProgram);
@@ -178,9 +165,9 @@ void renderText(const char *text, float x, float y, float scale,
 
     // Update VBO for each character
     float vertices[6][4] = {
-        {xpos, ypos + h, 0.0, 0.0}, {xpos, ypos, 0.0, 1.0},
-        {xpos + w, ypos, 1.0, 1.0}, {xpos, ypos + h, 0.0, 0.0},
-        {xpos + w, ypos, 1.0, 1.0}, {xpos + w, ypos + h, 1.0, 0.0},
+        {xpos, ypos + h, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 1.0f},
+        {xpos + w, ypos, 1.0f, 1.0f}, {xpos, ypos + h, 0.0f, 0.0f},
+        {xpos + w, ypos, 1.0f, 1.0f}, {xpos + w, ypos + h, 1.0f, 0.0f},
     };
 
     // Render glyph texture over quad
@@ -200,30 +187,39 @@ void renderText(const char *text, float x, float y, float scale,
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-int main() {
-  if (!glfwInit()) {
-    printf("error: glfw: failed to initialize\n");
+int main(void) {
+  GLFWwindow *window;
+
+  // Initialize the library
+  if (!glfwInit())
     return -1;
-  }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(winw, winh, "Todo", NULL, NULL);
+  // Create a windowed mode window and its OpenGL context
+  window = glfwCreateWindow(winw, winh, "Shader", NULL, NULL);
   if (!window) {
     glfwTerminate();
-    printf("error: glfw: failed to create window\n");
     return -1;
   }
 
+  // Make the window's context current
   glfwMakeContextCurrent(window);
   if (glewInit() != GLEW_OK) {
-    printf("error: glew: failed to initialize\n");
+    printf("Error initializing GLEW\n");
     return -1;
   }
 
-  // Compile and setup the shader
-  shaderProgram = setupShaders();
+  printf("%s\n", glGetString(GL_VERSION));
+
+  // Setup Buffers
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glBindVertexArray(VAO);
+
+  shaderProgram = createShader(vertexShaderSource, fragmentShaderSource);
   glUseProgram(shaderProgram);
 
   // Set orthographic projection matrix
@@ -240,28 +236,26 @@ int main() {
   // Setup buffers
   setupBuffers();
 
-  frame_count = 0;
-
+  // Loop until the user closes the window
   while (!glfwWindowShouldClose(window)) {
+    // Render here
     glClear(GL_COLOR_BUFFER_BIT);
-    // Nvim Colors: 0.117647f, 0.117647f, 0.180392f, 1.0f
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    frame_count++;
-
-    // print something on the window session
     char buffer[256];
-    snprintf(buffer, sizeof(buffer), "Todo Frame Count: %d", frame_count);
+    snprintf(buffer, sizeof(buffer), "Render This Text");
     float color[3] = {0.5f, 0.8f, 0.2f};
 
     renderText(buffer, 10.0f, winh - 50.0f, 1.0f, color);
 
-    glfwPollEvents();
     glfwSwapBuffers(window);
+    glfwPollEvents();
   }
 
-  glfwDestroyWindow(window);
-  glfwTerminate();
+  // Cleanup
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
 
+  glfwTerminate();
   return 0;
 }

@@ -17,9 +17,11 @@ static unsigned int compileShader(unsigned int type, const char *source) {
     glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
     char *message = (char *)alloca(length);
     glGetShaderInfoLog(id, length, &length, message);
+
     printf("Failed to compile %s shader\n",
            (type == GL_VERTEX_SHADER) ? "vertex" : "fragment");
     printf("%s\n", message);
+
     glDeleteShader(id);
     return 0; // Return 0 to indicate failure
   }
@@ -56,7 +58,7 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Create a windowed mode window and its OpenGL context
-  window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+  window = glfwCreateWindow(640, 480, "Shader", NULL, NULL);
   if (!window) {
     glfwTerminate();
     return -1;
@@ -85,6 +87,7 @@ int main(void) {
                                      "void main() {\n"
                                      "    color = vec4(1.0, 0.0, 0.0, 1.0);\n"
                                      "}\n";
+
   unsigned int shader = createShader(vertexShaderSource, fragmentShaderSource);
   glUseProgram(shader);
 
