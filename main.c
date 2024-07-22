@@ -28,6 +28,7 @@ NVGcontext *initializeNanoVG(const char *fontPath) {
   return vg;
 }
 
+// Don't really understand this right now
 void setupBuffer() {
   float positions[6] = {-0.5f, -0.5f, 0.5f, -0.5f, 0.0f, 0.5f};
   unsigned int buffer;
@@ -71,8 +72,8 @@ int main(void) {
   glBindVertexArray(vao);
 
   // Load Shaders
-  unsigned int shader =
-      createShaderFromFiles("vertex_shader.glsl", "fragment_shader.glsl");
+  unsigned int shader = createShaderFromFiles("shader_source_vertex.glsl",
+                                              "shader_source_fragment.glsl");
   if (shader == 0) {
     return -1;
   }
