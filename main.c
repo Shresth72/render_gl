@@ -103,7 +103,13 @@ int main(void) {
     nvgFontSize(vg, 48.0f);
     nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-    nvgText(vg, 10.0f, 10.0f, "Hello, NanoVG!", NULL);
+    nvgText(vg, 10.0f, 8.0f, "Hello, NanoVG!", NULL);
+
+    nvgBeginPath(vg);
+    nvgRect(vg, 10, 60, 120, 30);
+    nvgCircle(vg, 30, 120, 20);
+    nvgFillColor(vg, nvgRGB(255, 192, 0));
+    nvgFill(vg);
 
     nvgEndFrame(vg);
 
