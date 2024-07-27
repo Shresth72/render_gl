@@ -14,7 +14,11 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 // Don't really understand this right now
 void setupBuffer() {
-  float positions[6] = {-0.5f, -0.5f, 0.5f, -0.5f, 0.0f, 0.5f};
+  float positions[6] = {
+      -0.5f, -0.5f, //
+      0.5f,  -0.5f, //
+      0.0f,  0.5f   //
+  };
   unsigned int buffer;
   glGenBuffers(1, &buffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
