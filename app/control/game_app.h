@@ -8,6 +8,7 @@
 typedef struct {
   int width;
   int height;
+  const char *fontPath;
 } GameAppCreateInfo;
 
 typedef enum { CONTINUE, QUIT } returnCode;
@@ -21,6 +22,9 @@ typedef struct {
   double lastTime;
   double currentTime;
   int numFrames;
+
+  int mousePressed;
+  double mouseX, mouseY;
 } GameApp;
 
 GameApp *game_app_create(GameAppCreateInfo *createInfo);
