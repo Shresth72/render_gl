@@ -47,7 +47,8 @@ void configure_uniform_block(Engine *engine) {
          engine->blockIndex);
 
   glGetActiveUniformBlockiv(engine->shader, engine->blockIndex,
-                            GL_UNIFORM_BLOCK_DATA_SIZE, &engine->blockSize);
+                            GL_UNIFORM_BLOCK_DATA_SIZE,
+                            (int *)&engine->blockSize);
 
   printf("\ttaking up %d bytes\n", engine->blockSize);
 
