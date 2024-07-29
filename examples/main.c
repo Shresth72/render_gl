@@ -5,8 +5,8 @@
 #include <string.h>
 
 #define NANOVG_GL3_IMPLEMENTATION
-#include "nanovg/src/nanovg.h"
-#include "nanovg/src/nanovg_gl.h"
+#include "../nanovg/src/nanovg.h"
+#include "../nanovg/src/nanovg_gl.h"
 
 static int winw = 960, winh = 540;
 int mouse_pressed = 0;
