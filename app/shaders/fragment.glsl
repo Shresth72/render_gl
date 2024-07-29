@@ -1,6 +1,20 @@
 #version 330 core
-layout (location = 0) out vec4 color;
+
+in vec2 fragmentTexCoord;
+
+out vec4 finalColor;
+
+layout (std140) uniform diskParameters {
+  vec4 InnerColor;
+  vec4 OuterColor;
+  float InnerRadius;
+  float OuterRadius;
+};
 
 void main() {
-  color = vec4(1.0, 0.0, 0.0, 1.0);
+  float dx = fragmentTexCoord.x - 0.5;
+  float dy = fragmentTexCoord.y - 0.5;
+  float dist = sqrt(dx * dx + dy * dy);
+
+  finalColor = mix(InnerColor, OuterColor, smoothstep(InnerRadius, OuterRadius, dist));
 }

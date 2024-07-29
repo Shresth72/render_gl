@@ -12,12 +12,17 @@ typedef struct {
   unsigned int shader;
   QuadMesh *ourQuad;
   NVGcontext *vg;
+
+  unsigned int blockIndex;
+  unsigned int blockSize;
+  unsigned int UBO;
 } Engine;
 
 NVGcontext *initializeNanoVG(const char *fontPath);
-Engine *engine_create(const char *fontPath);
+Engine *engine_create(int width, int height, const char *fontPath);
 void engine_destroy(Engine *engine);
 void engine_create_models(Engine *engine);
+void configure_uniform_block(Engine *engine);
 void engine_render(Engine *engine, int width, int height, int mousePressed,
                    double mouseX, double mouseY);
 void engine_shader_render(Engine *engine);

@@ -11,3 +11,4 @@ typedef struct {
 
 QuadMesh *quadmesh_create(float w, float h);
 void quadmesh_destroy(QuadMesh *quad);
+void quadmesh_render(QuadMesh *quad);

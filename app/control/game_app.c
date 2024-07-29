@@ -40,7 +40,7 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
   glfwSetFramebufferSizeCallback(app->window, framebuffer_size_callback);
   glfwSetMouseButtonCallback(app->window, mouse_button_callback);
 
-  app->renderer = engine_create(createInfo->fontPath);
+  app->renderer = engine_create(app->width, app->height, createInfo->fontPath);
   if (!app->renderer) {
     glfwDestroyWindow(app->window);
     free(app);
