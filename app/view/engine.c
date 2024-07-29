@@ -1,7 +1,5 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #include "engine.h"
-#include "quadmesh.h"
-#include <GL/gl.h>
 
 NVGcontext *initializeNanoVG(const char *fontPath) {
   NVGcontext *vg = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
