@@ -1,5 +1,9 @@
 #pragma once
 #include "image.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 typedef struct {
   const char *filename;

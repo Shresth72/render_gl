@@ -1,5 +1,7 @@
 #pragma once
 #include "obj_loader.h"
+#include "stdio.h"
+#include "stdlib.h"
 
 typedef struct {
   const char *filename;

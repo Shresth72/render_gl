@@ -22,37 +22,41 @@ Scene *scene_create() {
 
   scene->numLights = 3;
   scene->lights = (Light **)malloc(scene->numLights * sizeof(Light *));
+  if (!scene->lights) {
+    free(scene);
+    return NULL;
+  }
 
   // Initialize Lights
-  LightCreateInfo lightInfo;
+  LightCreateInfo lightInfos[] = {
+      // Red light
+      {.color = {1.0f, 0.0f, 0.0f},
+       .position = {1.0f, 0.0f, 0.0f},
+       .strength = 4.0f},
 
-  // Red
-  lightInfo.color[0] = 1.0f;
-  lightInfo.color[1] = 0.0f;
-  lightInfo.color[2] = 0.0f;
-  lightInfo.position[0] = 1.0f;
-  lightInfo.position[1] = 0.0f;
-  lightInfo.position[2] = 0.0f;
-  lightInfo.strength = 4.0f;
-  scene->lights[0] = light_create(&lightInfo);
+      // Green light
+      {.color = {0.0f, 1.0f, 0.0f},
+       .position = {3.0f, 2.0f, 0.0f},
+       .strength = 4.0f},
 
-  // Green
-  lightInfo.color[0] = 0.0f;
-  lightInfo.color[1] = 1.0f;
-  lightInfo.color[2] = 0.0f;
-  lightInfo.position[0] = 3.0f;
-  lightInfo.position[1] = 2.0f;
-  lightInfo.position[2] = 0.0f;
-  scene->lights[1] = light_create(&lightInfo);
+      // Cyan light
+      {.color = {0.0f, 1.0f, 1.0f},
+       .position = {3.0f, 0.0f, 2.0f},
+       .strength = 4.0f},
+  };
 
-  // Cyan
-  lightInfo.color[0] = 0.0f;
-  lightInfo.color[1] = 1.0f;
-  lightInfo.color[2] = 1.0f;
-  lightInfo.position[0] = 3.0f;
-  lightInfo.position[1] = 0.0f;
-  lightInfo.position[2] = 2.0f;
-  scene->lights[2] = light_create(&lightInfo);
+  for (size_t i = 0; i < scene->numLights; ++i) {
+    scene->lights[i] = light_create(&lightInfos[i]);
+    if (!scene->lights[i]) {
+      // Handle light creation failure
+      for (size_t j = 0; j < i; ++j) {
+        light_destroy(scene->lights[j]);
+      }
+      free(scene->lights);
+      free(scene);
+      return NULL;
+    }
+  }
 
   return scene;
 }
