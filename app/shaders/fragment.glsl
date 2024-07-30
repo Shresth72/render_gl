@@ -11,10 +11,14 @@ layout (std140) uniform diskParameters {
   float OuterRadius;
 };
 
+float distToPoint(vec2 p1, vec2 p2) {
+  float dx = p1.x - p2.x;
+  float dy = p1.y - p2.y;
+  return sqrt(dx * dx + dy * dy);
+}
+
 void main() {
-  float dx = fragmentTexCoord.x - 0.5;
-  float dy = fragmentTexCoord.y - 0.5;
-  float dist = sqrt(dx * dx + dy * dy);
+  float dist = distToPoint(fragmentTexCoord, vec2(0.5, 0.5));
 
   finalColor = mix(InnerColor, OuterColor, smoothstep(InnerRadius, OuterRadius, dist));
 }

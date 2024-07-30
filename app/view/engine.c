@@ -1,6 +1,5 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #include "engine.h"
-#include "quadmesh.h"
 
 Engine *engine_create(int width, int height, const char *fontPath) {
   Engine *engine = (Engine *)malloc(sizeof(Engine));
@@ -31,8 +30,10 @@ Engine *engine_create(int width, int height, const char *fontPath) {
 
 void engine_destroy(Engine *engine) {
   quadmesh_destroy(engine->ourQuad);
+  glDeleteBuffers(1, &engine->UBO);
   glDeleteProgram(engine->shader);
   nvgDeleteGL3(engine->vg);
+
   free(engine);
 }
 
@@ -60,17 +61,12 @@ void configure_uniform_block(Engine *engine) {
   GLuint indices[4];
   glGetUniformIndices(engine->shader, 4, names, indices);
 
-  for (int i = 0; i < 4; ++i) {
-    printf("attribute \"%s\" has index: %d in the block.\n", names[i],
-           indices[i]);
-  }
-
   GLint offset[4];
   glGetActiveUniformsiv(engine->shader, 4, indices, GL_UNIFORM_OFFSET, offset);
 
   for (int i = 0; i < 4; ++i) {
-    printf("attribute \"%s\" has offset: %d in the block.\n", names[i],
-           offset[i]);
+    printf("attribute \"%s\" has index: %d with an offset: %d in the block.\n",
+           names[i], indices[i], offset[i]);
   }
 
   float outerColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
@@ -83,11 +79,15 @@ void configure_uniform_block(Engine *engine) {
   memcpy(blockBuffer + offset[2], &innerRadius, sizeof(float));
   memcpy(blockBuffer + offset[3], &outerRadius, sizeof(float));
 
-  glGenBuffers(1, &engine->UBO);
-  glBindBuffer(GL_UNIFORM_BUFFER, engine->UBO);
-  glBufferData(GL_UNIFORM_BUFFER, engine->blockSize, blockBuffer,
-               GL_DYNAMIC_DRAW);
-  glBindBufferBase(GL_UNIFORM_BUFFER, engine->blockIndex, engine->UBO);
+  glCreateBuffers(1, &engine->UBO);
+  glNamedBufferStorage(engine->UBO, engine->blockSize, blockBuffer,
+                       GL_DYNAMIC_STORAGE_BIT);
+
+  // glGenBuffers(1, &engine->UBO);
+  // glBindBuffer(GL_UNIFORM_BUFFER, engine->UBO);
+  // glBufferData(GL_UNIFORM_BUFFER, engine->blockSize, blockBuffer,
+  //              GL_DYNAMIC_DRAW);
+  // glBindBufferBase(GL_UNIFORM_BUFFER, engine->blockIndex, engine->UBO);
 
   free(blockBuffer);
 }
