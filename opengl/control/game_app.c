@@ -1,7 +1,7 @@
 #include "game_app.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-  GameApp *app = (GameApp *)glfwGetWindowUserPointer(window);
+  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
   GLCall(glViewport(0, 0, width, height));
   app->width = width;
   app->height = height;
@@ -9,7 +9,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
-  GameApp *app = (GameApp *)glfwGetWindowUserPointer(window);
+  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     app->mousePressed = 1;
   } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
@@ -36,9 +36,12 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
     return NULL;
   }
 
-  glfwSetWindowUserPointer(app->window, app);
-  glfwSetFramebufferSizeCallback(app->window, framebuffer_size_callback);
-  glfwSetMouseButtonCallback(app->window, mouse_button_callback);
+  GLCall(glfwSetWindowUserPointer(app->window, app));
+  GLCall(
+      glfwSetFramebufferSizeCallback(app->window, framebuffer_size_callback));
+  GLCall(glfwSetMouseButtonCallback(app->window, mouse_button_callback));
+
+  glfwSwapInterval(20);
 
   app->renderer = engine_create(app->width, app->height, createInfo->fontPath);
   if (!app->renderer) {
@@ -47,7 +50,7 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
     return NULL;
   }
 
-  app->lastTime = glfwGetTime();
+  GLCall(app->lastTime = glfwGetTime());
   app->currentTime = app->lastTime;
   app->numFrames = 0;
 
@@ -86,7 +89,8 @@ GLFWwindow *make_window(int width, int height) {
   GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
   GLCall(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
 
-  GLFWwindow *window = glfwCreateWindow(width, height, "Shader", NULL, NULL);
+  GLCall(GLFWwindow *window =
+             glfwCreateWindow(width, height, "Shader", NULL, NULL));
   if (!window) {
     GLCall(glfwTerminate());
     return NULL;
@@ -102,7 +106,7 @@ GLFWwindow *make_window(int width, int height) {
 }
 
 void calculate_frame_rate(GameApp *app) {
-  app->currentTime = glfwGetTime();
+  GLCall(app->currentTime = glfwGetTime());
   app->numFrames++;
   if (app->currentTime - app->lastTime >= 1.0) {
     printf("%f ms/frame\n", 1000.0 / (double)app->numFrames);

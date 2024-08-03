@@ -1,5 +1,56 @@
 #include "shader.h"
 
+ShaderEngine *shader_engine_create(const char *vertexPath,
+                                   const char *fragmentPath) {
+  ShaderEngine *shaderEngine = (ShaderEngine *)malloc(sizeof(ShaderEngine));
+
+  // Load Shader
+  shaderEngine->shader = util_load_shader(vertexPath, fragmentPath);
+  if (shaderEngine->shader == 0) {
+    free(shaderEngine);
+    return NULL;
+  }
+
+  GLCall(glUseProgram(shaderEngine->shader));
+  GLCall(shaderEngine->location =
+             glGetUniformLocation(shaderEngine->shader, "u_Color"));
+  ASSERT(shaderEngine->location != -1);
+  GLCall(glUniform4f(shaderEngine->location, 0.2f, 0.3f, 0.8f, 1.0f));
+
+  shaderEngine->r = 0.0f;
+  shaderEngine->increment = 0.05f;
+
+  // Create QuadMesh
+  shaderEngine->ourQuad = quadmesh_create(1.0f, 1.0f); // Initialize QuadMesh
+  if (shaderEngine->ourQuad == NULL) {
+    glDeleteProgram(shaderEngine->shader);
+    free(shaderEngine);
+    return NULL;
+  }
+
+  return shaderEngine;
+}
+
+void shader_engine_destroy(ShaderEngine *shaderEngine) {
+  quadmesh_destroy(shaderEngine->ourQuad); // Destroy the QuadMesh
+  GLCall(glDeleteProgram(shaderEngine->shader));
+  free(shaderEngine);
+}
+
+void shader_engine_render(ShaderEngine *shaderEngine) {
+  GLCall(
+      glUniform4f(shaderEngine->location, shaderEngine->r, 0.3f, 0.8f, 1.0f));
+  quadmesh_render(shaderEngine->ourQuad); // Render the quad
+
+  if (shaderEngine->r > 1.0f) {
+    shaderEngine->increment = -0.05f;
+  } else if (shaderEngine->r < 0.0f) {
+    shaderEngine->increment = 0.05f;
+  }
+
+  shaderEngine->r += shaderEngine->increment;
+}
+
 static char *load_shader_source(const char *filePath) {
   FILE *file = fopen(filePath, "r");
   if (!file) {
