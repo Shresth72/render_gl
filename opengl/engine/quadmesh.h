@@ -1,10 +1,11 @@
 #pragma once
+#include "../utils/errors.h"
 #include <GL/glew.h>
 #include <stdlib.h>
 #include <string.h>
 
 typedef struct {
-  unsigned int VBO, VAO;
+  unsigned int VBO, VAO, IBO;
   unsigned int vertexCount;
   float *vertices;
 } QuadMesh;

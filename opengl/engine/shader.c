@@ -27,20 +27,20 @@ static char *load_shader_source(const char *filePath) {
 
 static unsigned int compile_shader(unsigned int type, const char *source) {
   unsigned int id = glCreateShader(type);
-  glShaderSource(id, 1, &source, NULL);
-  glCompileShader(id);
+  GLCall(glShaderSource(id, 1, &source, NULL));
+  GLCall(glCompileShader(id));
 
   int result;
-  glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+  GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
   if (result == GL_FALSE) {
     int length;
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+    GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
     char *message = (char *)alloca(length);
-    glGetShaderInfoLog(id, length, &length, message);
+    GLCall(glGetShaderInfoLog(id, length, &length, message));
     fprintf(stderr, "Failed to compile %s shader\n",
             (type == GL_VERTEX_SHADER) ? "vertex" : "fragment");
     fprintf(stderr, "%s\n", message);
-    glDeleteShader(id);
+    GLCall(glDeleteShader(id));
     return 0;
   }
 
@@ -62,13 +62,13 @@ unsigned int util_load_shader(const char *vertexFilepath,
   unsigned int vs = compile_shader(GL_VERTEX_SHADER, vertexSource);
   unsigned int fs = compile_shader(GL_FRAGMENT_SHADER, fragmentSource);
 
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
-  glLinkProgram(program);
-  glValidateProgram(program);
+  GLCall(glAttachShader(program, vs));
+  GLCall(glAttachShader(program, fs));
+  GLCall(glLinkProgram(program));
+  GLCall(glValidateProgram(program));
 
-  glDeleteShader(vs);
-  glDeleteShader(fs);
+  GLCall(glDeleteShader(vs));
+  GLCall(glDeleteShader(fs));
 
   free(vertexSource);
   free(fragmentSource);

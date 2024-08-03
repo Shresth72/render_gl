@@ -17,7 +17,7 @@ Engine *engine_create(int width, int height) {
 
 void engine_destroy(Engine *engine) {
   quadmesh_destroy(engine->ourQuad);
-  glDeleteProgram(engine->shader);
+  GLCall(glDeleteProgram(engine->shader));
 
   free(engine);
 }
@@ -27,16 +27,13 @@ void engine_create_models(Engine *engine) {
 }
 
 void engine_render(Engine *engine, int width, int height) {
-  glViewport(0, 0, width, height);
-  // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  GLCall(glViewport(0, 0, width, height));
+  GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
   engine_shader_render(engine);
 }
 
 void engine_shader_render(Engine *engine) {
-  glUseProgram(engine->shader);
-  // glBindBufferRange(GL_UNIFORM_BUFFER, engine->blockIndex, engine->UBO, 0,
-  //                   engine->blockSize);
+  GLCall(glUseProgram(engine->shader));
   quadmesh_render(engine->ourQuad);
 }

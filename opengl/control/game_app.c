@@ -13,14 +13,14 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
 
   app->window = make_window(app->width, app->height);
   if (!app->window) {
-    glfwTerminate();
+    GLCall(glfwTerminate());
     free(app);
     return NULL;
   }
 
   app->renderer = engine_create(app->width, app->height);
   if (!app->renderer) {
-    glfwDestroyWindow(app->window);
+    GLCall(glfwDestroyWindow(app->window));
     free(app);
     return NULL;
   }
@@ -36,8 +36,8 @@ returnCode game_app_main_loop(GameApp *app) {
   calculate_frame_rate(app);
 
   engine_render(app->renderer, app->width, app->height);
-  glfwSwapBuffers(app->window);
-  glfwPollEvents();
+  GLCall(glfwSwapBuffers(app->window));
+  GLCall(glfwPollEvents());
 
   if (glfwWindowShouldClose(app->window)) {
     return QUIT;
@@ -48,23 +48,23 @@ returnCode game_app_main_loop(GameApp *app) {
 
 void game_app_destroy(GameApp *app) {
   engine_destroy(app->renderer);
-  glfwDestroyWindow(app->window);
-  glfwTerminate();
+  GLCall(glfwDestroyWindow(app->window));
+  GLCall(glfwTerminate());
   free(app);
 }
 
 GLFWwindow *make_window(int width, int height) {
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3));
+  GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
+  GLCall(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
 
   GLFWwindow *window = glfwCreateWindow(width, height, "Shader", NULL, NULL);
   if (!window) {
-    glfwTerminate();
+    GLCall(glfwTerminate());
     return NULL;
   }
 
-  glfwMakeContextCurrent(window);
+  GLCall(glfwMakeContextCurrent(window));
   if (glewInit() != GLEW_OK) {
     fprintf(stderr, "Failed to initialize GLEW\n");
     return NULL;

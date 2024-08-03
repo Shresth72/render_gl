@@ -1,7 +1,7 @@
 #pragma once
+#include "../utils/errors.h"
 #include "quadmesh.h"
 #include "shader.h"
-#include "utils/utils.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
