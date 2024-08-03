@@ -7,10 +7,12 @@
 #include <stdlib.h>
 
 typedef struct {
+  QuadMesh *ourQuad;
+
   unsigned int shader;
+
   int location;
   float r, increment;
-  QuadMesh *ourQuad;
 } ShaderEngine;
 
 ShaderEngine *shader_engine_create(const char *vertexPath,

@@ -10,8 +10,8 @@ ShaderEngine *shader_engine_create(const char *vertexPath,
     free(shaderEngine);
     return NULL;
   }
-  GLCall(glUseProgram(shaderEngine->shader));
 
+  GLCall(glUseProgram(shaderEngine->shader));
   GLCall(shaderEngine->location =
              glGetUniformLocation(shaderEngine->shader, "u_Color"));
   ASSERT(shaderEngine->location != -1);
@@ -21,7 +21,7 @@ ShaderEngine *shader_engine_create(const char *vertexPath,
   shaderEngine->increment = 0.05f;
 
   // Create QuadMesh
-  shaderEngine->ourQuad = quadmesh_create(1.0f, 1.0f);
+  shaderEngine->ourQuad = quadmesh_create(1.0f, 1.0f); // Initialize QuadMesh
   if (shaderEngine->ourQuad == NULL) {
     glDeleteProgram(shaderEngine->shader);
     free(shaderEngine);
@@ -32,17 +32,16 @@ ShaderEngine *shader_engine_create(const char *vertexPath,
 }
 
 void shader_engine_destroy(ShaderEngine *shaderEngine) {
-  quadmesh_destroy(shaderEngine->ourQuad);
+  quadmesh_destroy(shaderEngine->ourQuad); // Destroy the QuadMesh
   GLCall(glDeleteProgram(shaderEngine->shader));
   free(shaderEngine);
 }
 
 void shader_engine_render(ShaderEngine *shaderEngine) {
+  GLCall(glUseProgram(shaderEngine->shader));
   GLCall(
       glUniform4f(shaderEngine->location, shaderEngine->r, 0.3f, 0.8f, 1.0f));
-
-  // Render the quad
-  quadmesh_render(shaderEngine->ourQuad);
+  quadmesh_render(shaderEngine->ourQuad); // Render the quad
 
   if (shaderEngine->r > 1.0f) {
     shaderEngine->increment = -0.05f;
