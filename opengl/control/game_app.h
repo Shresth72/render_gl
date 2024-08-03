@@ -16,9 +16,9 @@ typedef enum { CONTINUE, QUIT } returnCode;
 
 typedef struct {
   GLFWwindow *window;
+  Engine *renderer;
   int width;
   int height;
-  Engine *renderer;
 
   double lastTime;
   double currentTime;

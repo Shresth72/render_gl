@@ -12,8 +12,8 @@
 #include "../../nanovg/src/nanovg_gl.h"
 
 typedef struct {
-  ShaderEngine *shaderEngine; // Pointer to ShaderEngine
-  TextEngine *textEngine;     // Pointer to TextEngine
+  ShaderEngine *shaderEngine;
+  TextEngine *textEngine;
 } Engine;
 
 Engine *engine_create(int width, int height, const char *fontPath);

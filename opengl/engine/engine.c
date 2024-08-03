@@ -32,6 +32,7 @@ void engine_destroy(Engine *engine) {
 void engine_render(Engine *engine, int width, int height, int mousePressed,
                    double mouseX, double mouseY) {
   shader_engine_render(engine->shaderEngine);
+
   // text_engine_render(engine->textEngine, width, height, mousePressed, mouseX,
   //                    mouseY);
 }
