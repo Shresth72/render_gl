@@ -1,9 +1,27 @@
 #include "game_app.h"
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  GameApp *app = (GameApp *)glfwGetWindowUserPointer(window);
+  GLCall(glViewport(0, 0, width, height));
+  app->width = width;
+  app->height = height;
+}
+
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods) {
+  GameApp *app = (GameApp *)glfwGetWindowUserPointer(window);
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    app->mousePressed = 1;
+  } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    app->mousePressed = 0;
+  }
+}
+
 GameApp *game_app_create(GameAppCreateInfo *createInfo) {
   GameApp *app = (GameApp *)malloc(sizeof(GameApp));
   app->width = createInfo->width;
   app->height = createInfo->height;
+  app->mousePressed = 0;
 
   if (!glfwInit()) {
     fprintf(stderr, "Failed to initialize GLFW\n");
@@ -18,7 +36,11 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
     return NULL;
   }
 
-  app->renderer = engine_create(app->width, app->height);
+  glfwSetWindowUserPointer(app->window, app);
+  glfwSetFramebufferSizeCallback(app->window, framebuffer_size_callback);
+  glfwSetMouseButtonCallback(app->window, mouse_button_callback);
+
+  app->renderer = engine_create(app->width, app->height, createInfo->fontPath);
   if (!app->renderer) {
     GLCall(glfwDestroyWindow(app->window));
     free(app);
@@ -35,7 +57,13 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
 returnCode game_app_main_loop(GameApp *app) {
   calculate_frame_rate(app);
 
-  engine_render(app->renderer, app->width, app->height);
+  GLCall(glfwGetCursorPos(app->window, &app->mouseX, &app->mouseY));
+  GLCall(glViewport(0, 0, app->width, app->height));
+  GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+  engine_render(app->renderer, app->width, app->height, app->mousePressed,
+                app->mouseX, app->mouseY);
+
   GLCall(glfwSwapBuffers(app->window));
   GLCall(glfwPollEvents());
 

@@ -1,1 +1,0 @@
-gcc -o main main.c control/game_app.c engine/engine.c engine/quadmesh.c engine/shader.c engine/material.c engine/image.c ../nanovg/src/nanovg.c ../nanovg/src/stb_image.h ../nanovg/src/stb_truetype.h -lglfw -lGL -lGLEW -lm -ldl && ./main
