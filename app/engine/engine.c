@@ -1,11 +1,12 @@
 #define NANOVG_GL3_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "engine.h"
 
 Engine *engine_create(int width, int height, const char *fontPath) {
   Engine *engine = (Engine *)malloc(sizeof(Engine));
 
-  engine->shader =
-      util_load_shader("shaders/vertex.glsl", "shaders/fragment.glsl");
+  engine->shader = util_load_shader("shaders/vertex_wood.glsl",
+                                    "shaders/fragment_wood.glsl");
   if (engine->shader == 0) {
     free(engine);
     return NULL;
@@ -18,12 +19,23 @@ Engine *engine_create(int width, int height, const char *fontPath) {
     return NULL;
   }
 
-  glUniform1f(glGetUniformLocation(engine->shader, "basicTexture"), 0);
   float aspectRatio = (float)width / (float)height;
+  glm_perspective(glm_rad(45.0f), aspectRatio, 0.1f, 10.0f, engine->projection);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
   engine_create_models(engine);
-  configure_uniform_block(engine);
+  check_gl_error("Create models");
+
+  Texture *texture = texture_create("textures/wood.jpeg");
+  texture_bind(texture, 0);
+
+  int location = glGetUniformLocation(engine->shader, "fragTexture");
+  if (location == -1)
+    printf("warning uniform %s doesn't exist\n", "fragTexture");
+
+  glUniform1i(location, 0);
+
+  // configure_uniform_block(engine);
 
   return engine;
 }
@@ -41,71 +53,14 @@ void engine_create_models(Engine *engine) {
   engine->ourQuad = quadmesh_create(0.75f, 0.75f);
 }
 
-void configure_uniform_block(Engine *engine) {
-  engine->blockIndex = glGetUniformBlockIndex(engine->shader, "diskParameters");
-
-  printf("diskParameters is a uniform block occupying block index: %d\n",
-         engine->blockIndex);
-
-  glGetActiveUniformBlockiv(engine->shader, engine->blockIndex,
-                            GL_UNIFORM_BLOCK_DATA_SIZE,
-                            (int *)&engine->blockSize);
-
-  printf("\ttaking up %d bytes\n", engine->blockSize);
-
-  GLubyte *blockBuffer = (GLubyte *)malloc(engine->blockSize);
-
-  const GLchar *names[] = {"InnerColor", "OuterColor", "InnerRadius",
-                           "OuterRadius"};
-
-  GLuint indices[4];
-  glGetUniformIndices(engine->shader, 4, names, indices);
-
-  GLint offset[4];
-  glGetActiveUniformsiv(engine->shader, 4, indices, GL_UNIFORM_OFFSET, offset);
-
-  for (int i = 0; i < 4; ++i) {
-    printf("attribute \"%s\" has index: %d with an offset: %d in the block.\n",
-           names[i], indices[i], offset[i]);
-  }
-
-  float outerColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-  float innerColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
-  float innerRadius = 0.25f;
-  float outerRadius = 0.5f;
-
-  memcpy(blockBuffer + offset[0], innerColor, 4 * sizeof(float));
-  memcpy(blockBuffer + offset[1], outerColor, 4 * sizeof(float));
-  memcpy(blockBuffer + offset[2], &innerRadius, sizeof(float));
-  memcpy(blockBuffer + offset[3], &outerRadius, sizeof(float));
-
-  glCreateBuffers(1, &engine->UBO);
-  glNamedBufferStorage(engine->UBO, engine->blockSize, blockBuffer,
-                       GL_DYNAMIC_STORAGE_BIT);
-
-  // glGenBuffers(1, &engine->UBO);
-  // glBindBuffer(GL_UNIFORM_BUFFER, engine->UBO);
-  // glBufferData(GL_UNIFORM_BUFFER, engine->blockSize, blockBuffer,
-  //              GL_DYNAMIC_DRAW);
-  // glBindBufferBase(GL_UNIFORM_BUFFER, engine->blockIndex, engine->UBO);
-
-  free(blockBuffer);
-}
-
-//
-//
-//
-// ENGINE RENDER
-//
-//
-//
-
 void engine_render(Engine *engine, int width, int height, int mousePressed,
                    double mouseX, double mouseY) {
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
+  check_gl_error("Clear Buffer");
 
   engine_shader_render(engine);
+  check_gl_error("Engine Shader render");
   engine_text_render(engine, width, height, mousePressed, mouseX, mouseY);
 }
 
@@ -168,4 +123,49 @@ NVGcontext *initializeNanoVG(const char *fontPath) {
   }
 
   return vg;
+}
+
+void configure_uniform_block(Engine *engine) {
+  engine->blockIndex = glGetUniformBlockIndex(engine->shader, "diskParameters");
+
+  printf("diskParameters is a uniform block occupying block index: %d\n",
+         engine->blockIndex);
+
+  glGetActiveUniformBlockiv(engine->shader, engine->blockIndex,
+                            GL_UNIFORM_BLOCK_DATA_SIZE,
+                            (int *)&engine->blockSize);
+
+  printf("\ttaking up %d bytes\n", engine->blockSize);
+
+  GLubyte *blockBuffer = (GLubyte *)malloc(engine->blockSize);
+
+  const GLchar *names[] = {"InnerColor", "OuterColor", "InnerRadius",
+                           "OuterRadius"};
+
+  GLuint indices[4];
+  glGetUniformIndices(engine->shader, 4, names, indices);
+
+  GLint offset[4];
+  glGetActiveUniformsiv(engine->shader, 4, indices, GL_UNIFORM_OFFSET, offset);
+
+  for (int i = 0; i < 4; ++i) {
+    printf("attribute \"%s\" has index: %d with an offset: %d in the block.\n",
+           names[i], indices[i], offset[i]);
+  }
+
+  float outerColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+  float innerColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+  float innerRadius = 0.25f;
+  float outerRadius = 0.5f;
+
+  memcpy(blockBuffer + offset[0], innerColor, 4 * sizeof(float));
+  memcpy(blockBuffer + offset[1], outerColor, 4 * sizeof(float));
+  memcpy(blockBuffer + offset[2], &innerRadius, sizeof(float));
+  memcpy(blockBuffer + offset[3], &outerRadius, sizeof(float));
+
+  glCreateBuffers(1, &engine->UBO);
+  glNamedBufferStorage(engine->UBO, engine->blockSize, blockBuffer,
+                       GL_DYNAMIC_STORAGE_BIT);
+
+  free(blockBuffer);
 }

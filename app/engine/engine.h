@@ -1,8 +1,11 @@
 #pragma once
 #include "quadmesh.h"
 #include "shader.h"
+#include "utils/material.h"
+#include "utils/texture.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
 #include <stdlib.h>
 
 #include "../../nanovg/src/nanovg.h"
@@ -12,6 +15,10 @@ typedef struct {
   unsigned int shader;
   QuadMesh *ourQuad;
   NVGcontext *vg;
+
+  mat4 projection;
+  mat4 view;
+  mat4 model;
 
   unsigned int blockIndex;
   unsigned int blockSize;

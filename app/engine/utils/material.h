@@ -16,3 +16,4 @@ typedef struct {
 Material *material_create(MaterialCreateInfo *createInfo);
 void material_destroy(Material *material);
 void material_use(Material *material);
+void check_gl_error(const char *label);

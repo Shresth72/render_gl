@@ -1,6 +1,5 @@
 #include "image.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "../../../nanovg/src/stb_image.h"
+#include "../../nanovg/src/stb_image.h"
 
 Image load_from_file(const char *filename) {
   Image result;
