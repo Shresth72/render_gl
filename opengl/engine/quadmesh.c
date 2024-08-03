@@ -23,36 +23,27 @@ QuadMesh *quadmesh_create(float w, float h) {
   memcpy(quad->vertices, vertices, len * sizeof(float));
 
   // Vertex Array Object
-  GLCall(glGenVertexArrays(1, &quad->VAO));
-  GLCall(glBindVertexArray(quad->VAO));
+  quad->VAO = *vertex_array_create();
 
   // Vertex Buffer Object
-  GLCall(glGenBuffers(1, &quad->VBO));
-  GLCall(glBindBuffer(GL_ARRAY_BUFFER, quad->VBO));
-  GLCall(glBufferData(GL_ARRAY_BUFFER, len * 2 * sizeof(float), quad->vertices,
-                      GL_STATIC_DRAW));
+  quad->VBO = *vertex_buffer_create(quad->vertices, len * 2 * sizeof(float));
 
-  // Link VBO to VAO
-  GLCall(glEnableVertexAttribArray(0));
-  GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
-                               (void *)0));
+  // Link VAO and VBO
+  quad->layout = *vertex_buffer_layout_create();
+  vertex_buffer_layout_push_float(&quad->layout, 2);
+  vertex_array_add_buffer(&quad->VAO, &quad->VBO, &quad->layout);
 
   // Vertex Indices Object
-  GLCall(glGenBuffers(1, &quad->IBO));
-  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad->IBO));
-  GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                      quad->vertexCount * sizeof(unsigned int), indices,
-                      GL_STATIC_DRAW));
-
-  GLCall(glBindVertexArray(0));
+  quad->IBO = *index_buffer_create(indices, quad->vertexCount);
 
   return quad;
 }
 
 void quadmesh_destroy(QuadMesh *quad) {
-  GLCall(glDeleteVertexArrays(1, &quad->VAO));
-  GLCall(glDeleteBuffers(1, &quad->VBO));
-  GLCall(glDeleteBuffers(1, &quad->IBO));
+  vertex_array_destroy(&quad->VAO);
+  vertex_buffer_destroy(&quad->VBO);
+  index_buffer_destroy(&quad->IBO);
+  vertex_buffer_layout_destroy(&quad->layout);
 
   free(quad->vertices);
   free(quad);
@@ -60,8 +51,8 @@ void quadmesh_destroy(QuadMesh *quad) {
 
 void quadmesh_render(QuadMesh *quad) {
   // Bind VAO and IBO
-  GLCall(glBindVertexArray(quad->VAO));
-  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad->IBO));
+  vertex_array_bind(&quad->VAO);
+  index_buffer_bind(&quad->IBO);
 
   // Draw Elements
   GLCall(

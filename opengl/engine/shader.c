@@ -39,18 +39,19 @@ void shader_engine_destroy(ShaderEngine *shaderEngine) {
 
 void shader_engine_render(ShaderEngine *shaderEngine) {
   GLCall(glUseProgram(shaderEngine->shader));
-  GLCall(glUniform4f(shaderEngine->location, 0.5f, 0.7f, 0.9f, 1.0f));
+  GLCall(
+      glUniform4f(shaderEngine->location, shaderEngine->r, 0.7f, 0.9f, 1.0f));
 
   // Render the quad
   quadmesh_render(shaderEngine->ourQuad);
 
-  // if (shaderEngine->r > 1.0f) {
-  //   shaderEngine->increment = -0.05f;
-  // } else if (shaderEngine->r < 0.0f) {
-  //   shaderEngine->increment = 0.05f;
-  // }
-  //
-  // shaderEngine->r += shaderEngine->increment;
+  if (shaderEngine->r > 1.0f) {
+    shaderEngine->increment = -0.05f;
+  } else if (shaderEngine->r < 0.0f) {
+    shaderEngine->increment = 0.05f;
+  }
+
+  shaderEngine->r += shaderEngine->increment;
 }
 
 static char *load_shader_source(const char *filePath) {
