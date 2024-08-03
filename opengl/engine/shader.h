@@ -8,7 +8,6 @@
 
 typedef struct {
   QuadMesh *ourQuad;
-
   unsigned int shader;
 
   int location;

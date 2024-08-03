@@ -22,16 +22,17 @@ QuadMesh *quadmesh_create(float w, float h) {
   quad->vertices = (float *)malloc(len * sizeof(float));
   memcpy(quad->vertices, vertices, len * sizeof(float));
 
-  // Vertex Buffer and Vertex Attributes Object
+  // Vertex Array Object
   GLCall(glGenVertexArrays(1, &quad->VAO));
-  GLCall(glGenBuffers(1, &quad->VBO));
-
   GLCall(glBindVertexArray(quad->VAO));
 
+  // Vertex Buffer Object
+  GLCall(glGenBuffers(1, &quad->VBO));
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, quad->VBO));
-  GLCall(glBufferData(GL_ARRAY_BUFFER, quad->vertexCount * 2 * sizeof(float),
-                      quad->vertices, GL_STATIC_DRAW));
+  GLCall(glBufferData(GL_ARRAY_BUFFER, len * 2 * sizeof(float), quad->vertices,
+                      GL_STATIC_DRAW));
 
+  // Link VBO to VAO
   GLCall(glEnableVertexAttribArray(0));
   GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
                                (void *)0));
@@ -51,12 +52,18 @@ QuadMesh *quadmesh_create(float w, float h) {
 void quadmesh_destroy(QuadMesh *quad) {
   GLCall(glDeleteVertexArrays(1, &quad->VAO));
   GLCall(glDeleteBuffers(1, &quad->VBO));
+  GLCall(glDeleteBuffers(1, &quad->IBO));
+
   free(quad->vertices);
   free(quad);
 }
 
 void quadmesh_render(QuadMesh *quad) {
+  // Bind VAO and IBO
   GLCall(glBindVertexArray(quad->VAO));
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad->IBO));
+
+  // Draw Elements
   GLCall(
       glDrawElements(GL_TRIANGLES, quad->vertexCount, GL_UNSIGNED_INT, NULL));
   GLCall(glBindVertexArray(0));
