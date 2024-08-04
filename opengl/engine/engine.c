@@ -1,7 +1,4 @@
 #include "engine.h"
-#include "buffers/index_buffer.h"
-#include "buffers/vertex_array.h"
-#include "shader/shader.h"
 
 Engine *engine_create(int width, int height, const char *fontPath) {
   Engine *engine = (Engine *)malloc(sizeof(Engine));

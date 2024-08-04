@@ -1,10 +1,13 @@
 #include "shader.h"
+#include "texture.h"
 
 Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
   Shader *shader = (Shader *)malloc(sizeof(Shader));
   shader->shaderId = 0;
   shader->uniformMap = uniform_create_hashmap();
 
+  // Init Texture and Shader
+  shader->texture = texture_create("textures/ink.png");
   shader->shaderId = util_load_shader(vertexPath, fragmentPath);
   if (shader->shaderId == 0) {
     free(shader);
@@ -14,8 +17,13 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
   shader->vertexfilepath = vertexPath;
   shader->fragfilepath = fragmentPath;
 
+  // Bind Shader
   shader_bind(shader);
-  shader_set_uniform4f(shader, "u_Color", 0.3f, 0.2f, 0.5, 1.0f);
+  // shader_set_uniform4f(shader, "u_Color", 0.6f, 0.2f, 0.5, 1.0f);
+
+  // Bind Texture
+  texture_bind(shader->texture, 0);
+  shader_set_uniform1i(shader, "u_Texture", 0);
 
   // Create QuadMesh
   shader->ourQuad = quadmesh_create(1.0f, 1.0f);
@@ -35,12 +43,16 @@ void shader_destroy(Shader *shader) {
   quadmesh_destroy(shader->ourQuad);
   GLCall(glDeleteProgram(shader->shaderId));
   uniform_hashmap_destroy(shader->uniformMap);
+  texture_destroy(shader->texture);
   free(shader);
 }
 
 void shader_render(Shader *shader) {
   shader_bind(shader);
-  shader_set_uniform4f(shader, "u_Color", shader->r, 0.2f, 0.5, 1.0f);
+  // shader_set_uniform4f(shader, "u_Color", shader->r, 0.2f, 0.5, 1.0f);
+
+  texture_bind(shader->texture, 0);
+  shader_set_uniform1i(shader, "u_Texture", 0);
 
   // Render the quad
   quadmesh_render(shader->ourQuad);
@@ -57,6 +69,15 @@ void shader_render(Shader *shader) {
 void shader_bind(Shader *shader) { GLCall(glUseProgram(shader->shaderId)); };
 
 void shader_unbind(Shader *shader) { GLCall(glUseProgram(0)); }
+
+// Uniforms
+void shader_set_uniform1i(Shader *shader, const char *name, int value) {
+  GLCall(glUniform1i(shader_get_uniform_location(shader, name), value));
+}
+
+void shader_set_uniform1f(Shader *shader, const char *name, float value) {
+  GLCall(glUniform1i(shader_get_uniform_location(shader, name), value));
+}
 
 void shader_set_uniform4f(Shader *shader, const char *name, float v0, float v1,
                           float v2, float v3) {

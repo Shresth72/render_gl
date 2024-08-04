@@ -89,6 +89,8 @@ GLFWwindow *make_window(int width, int height) {
   GLCall(glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3));
   GLCall(glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE));
 
+  GLCall(glfwWindowHint(GLFW_DECORATED, GLFW_TRUE));
+
   GLCall(GLFWwindow *window =
              glfwCreateWindow(width, height, "Shader", NULL, NULL));
   if (!window) {

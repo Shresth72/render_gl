@@ -1,6 +1,6 @@
 #pragma once
 #include "../utils/errors.h"
-#include "quadmesh.h"
+#include "shader/quadmesh.h"
 #include "shader/shader.h"
 #include "text/text.h"
 #include <GL/glew.h>

@@ -4,11 +4,11 @@ QuadMesh *quadmesh_create(float w, float h) {
   QuadMesh *quad = (QuadMesh *)malloc(sizeof(QuadMesh));
 
   float vertices[] = {
-      -0.5f, -0.5f, //
-      0.5f, -0.5f,  //
-      0.5f, 0.5f,   //
-                    //
-      -0.5f, 0.5f,  //
+      -0.5f, -0.5f, 0.0f, 0.0f, //
+      0.5f, -0.5f, 1.0f, 0.0f,  //
+      0.5f, 0.5f, 1.0f, 1.0f,   //
+                                //
+      -0.5f, 0.5f, 0.0f, 1.0f,  //
   };
 
   unsigned int indices[] = {
@@ -22,14 +22,19 @@ QuadMesh *quadmesh_create(float w, float h) {
   quad->vertices = (float *)malloc(len * sizeof(float));
   memcpy(quad->vertices, vertices, len * sizeof(float));
 
+  // Blending
+  GLCall(glEnable(GL_BLEND));
+  GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
   // Vertex Array Object
   quad->VAO = *vertex_array_create();
 
   // Vertex Buffer Object
-  quad->VBO = *vertex_buffer_create(quad->vertices, len * 2 * sizeof(float));
+  quad->VBO = *vertex_buffer_create(quad->vertices, len * sizeof(float));
 
   // Link VAO and VBO
   quad->layout = *vertex_buffer_layout_create();
+  vertex_buffer_layout_push_float(&quad->layout, 2);
   vertex_buffer_layout_push_float(&quad->layout, 2);
   vertex_array_add_buffer(&quad->VAO, &quad->VBO, &quad->layout);
 
