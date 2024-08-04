@@ -1,59 +1,85 @@
 #include "shader.h"
 
-ShaderEngine *shader_engine_create(const char *vertexPath,
-                                   const char *fragmentPath) {
-  ShaderEngine *shaderEngine = (ShaderEngine *)malloc(sizeof(ShaderEngine));
+Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
+  Shader *shader = (Shader *)malloc(sizeof(Shader));
+  shader->shaderId = 0;
+  shader->uniformMap = uniform_create_hashmap();
 
-  // Load Shader
-  shaderEngine->shader = util_load_shader(vertexPath, fragmentPath);
-  if (shaderEngine->shader == 0) {
-    free(shaderEngine);
+  shader->shaderId = util_load_shader(vertexPath, fragmentPath);
+  if (shader->shaderId == 0) {
+    free(shader);
     return NULL;
   }
 
-  GLCall(glUseProgram(shaderEngine->shader));
-  GLCall(shaderEngine->location =
-             glGetUniformLocation(shaderEngine->shader, "u_Color"));
-  ASSERT(shaderEngine->location != -1);
-  GLCall(glUniform4f(shaderEngine->location, 0.2f, 0.3f, 0.8f, 1.0f));
+  shader->vertexfilepath = vertexPath;
+  shader->fragfilepath = fragmentPath;
+
+  shader_bind(shader);
+  shader_set_uniform4f(shader, "u_Color", 0.3f, 0.2f, 0.5, 1.0f);
 
   // Create QuadMesh
-  shaderEngine->ourQuad = quadmesh_create(1.0f, 1.0f);
-  if (shaderEngine->ourQuad == NULL) {
-    glDeleteProgram(shaderEngine->shader);
-    free(shaderEngine);
+  shader->ourQuad = quadmesh_create(1.0f, 1.0f);
+  if (shader->ourQuad == NULL) {
+    glDeleteProgram(shader->shaderId);
+    free(shader);
     return NULL;
   }
 
-  shaderEngine->r = 0.0f;
-  shaderEngine->increment = 0.05f;
+  shader->r = 0.0f;
+  shader->increment = 0.05f;
 
-  return shaderEngine;
+  return shader;
 }
 
-void shader_engine_destroy(ShaderEngine *shaderEngine) {
-  quadmesh_destroy(shaderEngine->ourQuad); // Destroy the QuadMesh
-  GLCall(glDeleteProgram(shaderEngine->shader));
-  free(shaderEngine);
+void shader_destroy(Shader *shader) {
+  quadmesh_destroy(shader->ourQuad);
+  GLCall(glDeleteProgram(shader->shaderId));
+  uniform_hashmap_destroy(shader->uniformMap);
+  free(shader);
 }
 
-void shader_engine_render(ShaderEngine *shaderEngine) {
-  GLCall(glUseProgram(shaderEngine->shader));
-  GLCall(
-      glUniform4f(shaderEngine->location, shaderEngine->r, 0.7f, 0.9f, 1.0f));
+void shader_render(Shader *shader) {
+  shader_bind(shader);
+  shader_set_uniform4f(shader, "u_Color", shader->r, 0.2f, 0.5, 1.0f);
 
   // Render the quad
-  quadmesh_render(shaderEngine->ourQuad);
+  quadmesh_render(shader->ourQuad);
 
-  if (shaderEngine->r > 1.0f) {
-    shaderEngine->increment = -0.05f;
-  } else if (shaderEngine->r < 0.0f) {
-    shaderEngine->increment = 0.05f;
+  if (shader->r > 1.0f) {
+    shader->increment = -0.05f;
+  } else if (shader->r < 0.0f) {
+    shader->increment = 0.05f;
   }
 
-  shaderEngine->r += shaderEngine->increment;
+  shader->r += shader->increment;
 }
 
+void shader_bind(Shader *shader) { GLCall(glUseProgram(shader->shaderId)); };
+
+void shader_unbind(Shader *shader) { GLCall(glUseProgram(0)); }
+
+void shader_set_uniform4f(Shader *shader, const char *name, float v0, float v1,
+                          float v2, float v3) {
+  GLCall(
+      glUniform4f(shader_get_uniform_location(shader, name), v0, v1, v2, v3));
+}
+
+int shader_get_uniform_location(Shader *shader, const char *name) {
+  int location = uniform_hashmap_get(shader->uniformMap, name);
+
+  if (location == -1) {
+    location = glGetUniformLocation(shader->shaderId, name);
+
+    if (location != -1) {
+      uniform_hashmap_add(shader->uniformMap, name, location);
+    } else {
+      printf("Warning: uniform %s doesn't exist\n", name);
+    }
+  }
+  return location;
+}
+
+// Load Shader Functions
 static char *load_shader_source(const char *filePath) {
   FILE *file = fopen(filePath, "r");
   if (!file) {

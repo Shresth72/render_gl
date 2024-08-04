@@ -1,21 +1,24 @@
 #include "engine.h"
+#include "buffers/index_buffer.h"
+#include "buffers/vertex_array.h"
+#include "shader/shader.h"
 
 Engine *engine_create(int width, int height, const char *fontPath) {
   Engine *engine = (Engine *)malloc(sizeof(Engine));
 
   // Initialize Shader Engine
-  engine->shaderEngine =
-      shader_engine_create("shaders/vertex.glsl", "shaders/fragment.glsl");
-  if (!engine->shaderEngine) {
+  engine->shader =
+      shader_create("shaders/vertex.glsl", "shaders/fragment.glsl");
+  if (!engine->shader) {
     printf("Could not create shader engine.\n");
     free(engine);
     return NULL;
   }
 
   // Initialize Text Engine
-  engine->textEngine = text_engine_create(fontPath);
-  if (!engine->textEngine) {
-    shader_engine_destroy(engine->shaderEngine);
+  engine->text = text_create(fontPath);
+  if (!engine->text) {
+    shader_destroy(engine->shader);
     free(engine);
     return NULL;
   }
@@ -24,15 +27,14 @@ Engine *engine_create(int width, int height, const char *fontPath) {
 }
 
 void engine_destroy(Engine *engine) {
-  shader_engine_destroy(engine->shaderEngine);
-  text_engine_destroy(engine->textEngine);
+  shader_destroy(engine->shader);
+  text_destroy(engine->text);
   free(engine);
 }
 
 void engine_render(Engine *engine, int width, int height, int mousePressed,
                    double mouseX, double mouseY) {
-  shader_engine_render(engine->shaderEngine);
+  shader_render(engine->shader);
 
-  text_engine_render(engine->textEngine, width, height, mousePressed, mouseX,
-                     mouseY);
+  text_render(engine->text, width, height, mousePressed, mouseX, mouseY);
 }
