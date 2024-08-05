@@ -1,20 +1,48 @@
 #include "game_app.h"
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
-  GLCall(glViewport(0, 0, width, height));
-  app->width = width;
-  app->height = height;
-}
+int send_message_to_server(const char *message) {
+  int sockfd;
+  struct sockaddr_in server_addr;
+  char buffer[BUFFER_SIZE];
 
-void mouse_button_callback(GLFWwindow *window, int button, int action,
-                           int mods) {
-  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    app->mousePressed = 1;
-  } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-    app->mousePressed = 0;
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    printf("Socket creation failed\n");
+    return -1;
   }
+
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(SERVER_PORT);
+  server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+
+  if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) <
+      0) {
+    printf("Connection to server failed\n");
+    close(sockfd);
+    return -1;
+  }
+
+  char message_with_newline[256];
+  snprintf(message_with_newline, sizeof(message_with_newline), "%s\n", message);
+
+  if (send(sockfd, message_with_newline, strlen(message_with_newline), 0) < 0) {
+    printf("Sending message to the server failed\n");
+    close(sockfd);
+    return -1;
+  }
+
+  memset(buffer, 0, BUFFER_SIZE);
+  int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+  if (bytes_received < 0) {
+    printf("Error receiving response from server\n");
+    close(sockfd);
+    return -1;
+  }
+
+  // printf("Server: %s\n", buffer);
+
+  close(sockfd);
+  return 0;
 }
 
 GameApp *game_app_create(GameAppCreateInfo *createInfo) {
@@ -74,6 +102,17 @@ returnCode game_app_main_loop(GameApp *app) {
     return QUIT;
   }
 
+  float currentR = app->renderer->shader->r;
+  if (currentR != app->renderer->shader->prevR) {
+    char message[256];
+    snprintf(message, sizeof(message), "Shader r value: %f\n",
+             app->renderer->shader->r);
+    if (send_message_to_server(message) == -1) {
+      return QUIT;
+    }
+    app->renderer->shader->prevR = currentR;
+  }
+
   return CONTINUE;
 }
 
@@ -107,6 +146,7 @@ GLFWwindow *make_window(int width, int height) {
   return window;
 }
 
+// Utils
 void calculate_frame_rate(GameApp *app) {
   GLCall(app->currentTime = glfwGetTime());
   app->numFrames++;
@@ -114,5 +154,22 @@ void calculate_frame_rate(GameApp *app) {
     printf("%f ms/frame\n", 1000.0 / (double)app->numFrames);
     app->numFrames = 0;
     app->lastTime += 1.0;
+  }
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
+  GLCall(glViewport(0, 0, width, height));
+  app->width = width;
+  app->height = height;
+}
+
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods) {
+  GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    app->mousePressed = 1;
+  } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    app->mousePressed = 0;
   }
 }

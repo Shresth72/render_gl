@@ -34,6 +34,7 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
   }
 
   shader->r = 0.0f;
+  shader->prevR = 1.0f;
   shader->increment = 0.05f;
 
   return shader;

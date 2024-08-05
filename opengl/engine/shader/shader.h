@@ -18,7 +18,7 @@ typedef struct {
 
   UniformHashMap *uniformMap;
 
-  float r, increment;
+  float r, increment, prevR;
 } Shader;
 
 Shader *shader_create(const char *vertexPath, const char *fragmentPath);
