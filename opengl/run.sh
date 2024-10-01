@@ -1,0 +1,1 @@
+gcc -o main main.c control/game_app.c engine/engine.c engine/shader/quadmesh.c utils/errors.c engine/text/text.c ../nanovg/src/nanovg.c engine/buffers/index_buffer.c engine/buffers/vertex_buffer.c engine/buffers/vertex_array.c engine/buffers/vertex_buffer_layout.c engine/shader/uniform_map.c engine/shader/shader.c engine/shader/texture.c -lglfw -lGL -lGLEW -lm -ldl && ./main

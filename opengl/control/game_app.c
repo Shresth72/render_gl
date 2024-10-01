@@ -102,16 +102,16 @@ returnCode game_app_main_loop(GameApp *app) {
     return QUIT;
   }
 
-  float currentR = app->renderer->shader->r;
-  if (currentR != app->renderer->shader->prevR) {
-    char message[256];
-    snprintf(message, sizeof(message), "Shader r value: %f\n",
-             app->renderer->shader->r);
-    if (send_message_to_server(message) == -1) {
-      return QUIT;
-    }
-    app->renderer->shader->prevR = currentR;
-  }
+  // float currentR = app->renderer->shader->r;
+  // if (currentR != app->renderer->shader->prevR) {
+  //   char message[256];
+  //   snprintf(message, sizeof(message), "Shader r value: %f\n",
+  //            app->renderer->shader->r);
+  //   if (send_message_to_server(message) == -1) {
+  //     return QUIT;
+  //   }
+  //   app->renderer->shader->prevR = currentR;
+  // }
 
   return CONTINUE;
 }
