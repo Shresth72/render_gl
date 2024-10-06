@@ -36,7 +36,7 @@ void text_render(Text *text, int width, int height, int mousePressed,
   nvgFontSize(text->vg, 48.0f);
   nvgFillColor(text->vg, nvgRGBA(255, 255, 255, 255));
   nvgTextAlign(text->vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-  nvgText(text->vg, 10.0f, 8.0f, "Hello, NanoVG!", NULL);
+  nvgText(text->vg, 10.0f, 8.0f, "Hello, Srijan!", NULL);
 
   // Draw Buttons
   float buttonWidth = 40.0f;
