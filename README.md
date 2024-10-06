@@ -1,7 +1,11 @@
 # render_gl
 
+My C engine for rendering text, images and vectors using nanovg, textures and shaders respectively.
+
+Based on OpenGL and GLFW
+
 ### Run
 
 ```bash
-gcc -o main main.c control/game_app.c view/engine.c view/quadmesh.c view/shader.c ../nanovg/src/nanovg.c -lglfw -lGL -lGLEW -ldl -lm
+make run
 ```
