@@ -58,13 +58,13 @@ void shader_render(Shader *shader) {
   // Render the quad
   quadmesh_render(shader->ourQuad);
 
-  if (shader->r > 1.0f) {
-    shader->increment = -0.05f;
-  } else if (shader->r < 0.0f) {
-    shader->increment = 0.05f;
-  }
-
-  shader->r += shader->increment;
+  // if (shader->r > 1.0f) {
+  //   shader->increment = -0.05f;
+  // } else if (shader->r < 0.0f) {
+  //   shader->increment = 0.05f;
+  // }
+  //
+  // shader->r += shader->increment;
 }
 
 void shader_bind(Shader *shader) { GLCall(glUseProgram(shader->shaderId)); };

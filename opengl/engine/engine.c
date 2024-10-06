@@ -5,7 +5,7 @@ Engine *engine_create(int width, int height, const char *fontPath) {
 
   // Initialize Shader Engine
   engine->shader =
-      shader_create("shaders/vertex.glsl", "shaders/fragment.glsl");
+      shader_create("shaders/ink/vertex.glsl", "shaders/ink/fragment.glsl");
   if (!engine->shader) {
     printf("Could not create shader engine.\n");
     free(engine);
