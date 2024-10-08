@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../shader/quadmesh.h"
-#include "../../shader/shader.h"
-#include "../../shader/texture.h"
+#include "../../render/quadmesh.h"
+#include "../../render/shader.h"
+#include "../../render/texture.h"
 
 typedef struct {
   QuadMesh *quadMesh;

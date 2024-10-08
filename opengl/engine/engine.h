@@ -1,8 +1,8 @@
 #pragma once
 #include "../utils/errors.h"
 #include "objects/ink/ink.h"
-#include "shader/quadmesh.h"
-#include "shader/shader.h"
+#include "render/quadmesh.h"
+#include "render/shader.h"
 #include "text/text.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>

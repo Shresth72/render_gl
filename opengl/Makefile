@@ -2,12 +2,12 @@
 CC = gcc
 
 # Source files
-SRCS = main.c control/game_app.c engine/engine.c engine/shader/quadmesh.c \
+SRCS = main.c control/game_app.c engine/engine.c engine/render/quadmesh.c \
        utils/errors.c engine/text/text.c ../nanovg/src/nanovg.c \
        engine/buffers/index_buffer.c engine/buffers/vertex_buffer.c \
        engine/buffers/vertex_array.c engine/buffers/vertex_buffer_layout.c \
-       engine/shader/uniform_map.c engine/shader/shader.c \
-       engine/shader/texture.c \
+       engine/render/uniform_map.c engine/render/shader.c \
+       engine/render/texture.c \
 			 engine/objects/ink/ink.c
 
 # Libraries to link with
