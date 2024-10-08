@@ -1,13 +1,16 @@
 #include "shader.h"
-#include "texture.h"
 
-Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
+Shader *shader_create(const char *vertexPath, const char *fragmentPath,
+                      QuadMesh *quad, Texture *texture) {
   Shader *shader = (Shader *)malloc(sizeof(Shader));
   shader->shaderId = 0;
   shader->uniformMap = uniform_create_hashmap();
 
   // Init Texture and Shader
-  shader->texture = texture_create("textures/ink.png");
+  if (texture != NULL) {
+    shader->texture = texture;
+  }
+
   shader->shaderId = util_load_shader(vertexPath, fragmentPath);
   if (shader->shaderId == 0) {
     free(shader);
@@ -22,16 +25,13 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
   // shader_set_uniform4f(shader, "u_Color", 0.6f, 0.2f, 0.5, 1.0f);
 
   // Bind Texture
-  texture_bind(shader->texture, 0);
-  shader_set_uniform1i(shader, "u_Texture", 0);
-
-  // Create QuadMesh
-  shader->ourQuad = quadmesh_create(1.0f, 1.0f);
-  if (shader->ourQuad == NULL) {
-    glDeleteProgram(shader->shaderId);
-    free(shader);
-    return NULL;
+  if (shader->texture != NULL) {
+    texture_bind(shader->texture, 0);
+    shader_set_uniform1i(shader, "u_Texture", 0);
   }
+
+  // Set the QuadMesh
+  shader->quad = quad;
 
   shader->r = 0.0f;
   shader->prevR = 1.0f;
@@ -41,7 +41,7 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath) {
 }
 
 void shader_destroy(Shader *shader) {
-  quadmesh_destroy(shader->ourQuad);
+  quadmesh_destroy(shader->quad);
   GLCall(glDeleteProgram(shader->shaderId));
   uniform_hashmap_destroy(shader->uniformMap);
   texture_destroy(shader->texture);
@@ -56,7 +56,7 @@ void shader_render(Shader *shader) {
   shader_set_uniform1i(shader, "u_Texture", 0);
 
   // Render the quad
-  quadmesh_render(shader->ourQuad);
+  quadmesh_render(shader->quad);
 
   // if (shader->r > 1.0f) {
   //   shader->increment = -0.05f;

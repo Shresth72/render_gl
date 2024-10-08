@@ -1,26 +1,12 @@
 #include "quadmesh.h"
 
-QuadMesh *quadmesh_create(float w, float h) {
+QuadMesh *quadmesh_create(float *vertices, unsigned int *indices,
+                          size_t vertexCount, size_t indexCount) {
   QuadMesh *quad = (QuadMesh *)malloc(sizeof(QuadMesh));
 
-  float vertices[] = {
-      -0.5f, -0.5f, 0.0f, 0.0f, //
-      0.5f, -0.5f, 1.0f, 0.0f,  //
-      0.5f, 0.5f, 1.0f, 1.0f,   //
-                                //
-      -0.5f, 0.5f, 0.0f, 1.0f,  //
-  };
-
-  unsigned int indices[] = {
-      0, 1, 2, //
-      2, 3, 0, //
-  };
-
-  quad->vertexCount = sizeof(indices) / sizeof(indices[0]);
-
-  int len = sizeof(vertices) / sizeof(vertices[0]);
-  quad->vertices = (float *)malloc(len * sizeof(float));
-  memcpy(quad->vertices, vertices, len * sizeof(float));
+  quad->indexCount = indexCount;
+  quad->vertices = (float *)malloc(vertexCount * sizeof(float));
+  memcpy(quad->vertices, vertices, vertexCount * sizeof(float));
 
   // Blending
   GLCall(glEnable(GL_BLEND));
@@ -30,7 +16,8 @@ QuadMesh *quadmesh_create(float w, float h) {
   quad->VAO = *vertex_array_create();
 
   // Vertex Buffer Object
-  quad->VBO = *vertex_buffer_create(quad->vertices, len * sizeof(float));
+  quad->VBO =
+      *vertex_buffer_create(quad->vertices, vertexCount * sizeof(float));
 
   // Link VAO and VBO
   quad->layout = *vertex_buffer_layout_create();
@@ -39,7 +26,7 @@ QuadMesh *quadmesh_create(float w, float h) {
   vertex_array_add_buffer(&quad->VAO, &quad->VBO, &quad->layout);
 
   // Vertex Indices Object
-  quad->IBO = *index_buffer_create(indices, quad->vertexCount);
+  quad->IBO = *index_buffer_create(indices, quad->indexCount);
 
   return quad;
 }
@@ -60,7 +47,6 @@ void quadmesh_render(QuadMesh *quad) {
   index_buffer_bind(&quad->IBO);
 
   // Draw Elements
-  GLCall(
-      glDrawElements(GL_TRIANGLES, quad->vertexCount, GL_UNSIGNED_INT, NULL));
+  GLCall(glDrawElements(GL_TRIANGLES, quad->indexCount, GL_UNSIGNED_INT, NULL));
   GLCall(glBindVertexArray(0));
 }

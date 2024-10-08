@@ -9,11 +9,13 @@
 #include <stdlib.h>
 
 typedef struct {
-  QuadMesh *ourQuad;
+  QuadMesh *quad;
   unsigned int shaderId;
 
   const char *vertexfilepath;
   const char *fragfilepath;
+  const char *texturepath;
+
   Texture *texture;
 
   UniformHashMap *uniformMap;
@@ -21,7 +23,8 @@ typedef struct {
   float r, increment, prevR;
 } Shader;
 
-Shader *shader_create(const char *vertexPath, const char *fragmentPath);
+Shader *shader_create(const char *vertexPath, const char *fragmentPath,
+                      QuadMesh *quad, Texture *texture);
 void shader_destroy(Shader *shader);
 void shader_render(Shader *shader);
 void shader_bind(Shader *shader);

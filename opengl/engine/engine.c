@@ -3,11 +3,11 @@
 Engine *engine_create(int width, int height, const char *fontPath) {
   Engine *engine = (Engine *)malloc(sizeof(Engine));
 
-  // Initialize Shader Engine
-  engine->shader =
-      shader_create("shaders/ink/vertex.glsl", "shaders/ink/fragment.glsl");
-  if (!engine->shader) {
+  // Initialize Ink Object
+  engine->inkObj = ink_object_create();
+  if (!engine->inkObj) {
     printf("Could not create shader engine.\n");
+    ink_object_destroy(engine->inkObj);
     free(engine);
     return NULL;
   }
@@ -15,7 +15,7 @@ Engine *engine_create(int width, int height, const char *fontPath) {
   // Initialize Text Engine
   engine->text = text_create(fontPath);
   if (!engine->text) {
-    shader_destroy(engine->shader);
+    ink_object_destroy(engine->inkObj);
     free(engine);
     return NULL;
   }
@@ -24,14 +24,14 @@ Engine *engine_create(int width, int height, const char *fontPath) {
 }
 
 void engine_destroy(Engine *engine) {
-  shader_destroy(engine->shader);
+  ink_object_destroy(engine->inkObj);
   text_destroy(engine->text);
   free(engine);
 }
 
 void engine_render(Engine *engine, int width, int height, int mousePressed,
                    double mouseX, double mouseY) {
-  shader_render(engine->shader);
+  ink_object_render(engine->inkObj);
 
   text_render(engine->text, width, height, mousePressed, mouseX, mouseY);
 }

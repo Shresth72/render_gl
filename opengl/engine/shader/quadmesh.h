@@ -8,15 +8,17 @@
 
 typedef struct {
   IndexBuffer IBO;
-  unsigned int vertexCount;
+  unsigned int indexCount;
 
   VertexBuffer VBO;
   float *vertices;
+  unsigned int *indices;
 
   VertexArray VAO;
   VertexBufferLayout layout;
 } QuadMesh;
 
-QuadMesh *quadmesh_create(float w, float h);
+QuadMesh *quadmesh_create(float *vertices, unsigned int *indices,
+                          size_t vertexCount, size_t indexCount);
 void quadmesh_destroy(QuadMesh *quad);
 void quadmesh_render(QuadMesh *quad);

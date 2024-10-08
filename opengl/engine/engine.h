@@ -1,5 +1,6 @@
 #pragma once
 #include "../utils/errors.h"
+#include "objects/ink/ink.h"
 #include "shader/quadmesh.h"
 #include "shader/shader.h"
 #include "text/text.h"
@@ -12,7 +13,11 @@
 #include "../../nanovg/src/nanovg_gl.h"
 
 typedef struct {
-  Shader *shader;
+  InkObject *inkObj;
+
+  // Shader Objects
+  // Shader *tank;
+
   Text *text;
 } Engine;
 

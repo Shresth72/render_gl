@@ -7,7 +7,8 @@ SRCS = main.c control/game_app.c engine/engine.c engine/shader/quadmesh.c \
        engine/buffers/index_buffer.c engine/buffers/vertex_buffer.c \
        engine/buffers/vertex_array.c engine/buffers/vertex_buffer_layout.c \
        engine/shader/uniform_map.c engine/shader/shader.c \
-       engine/shader/texture.c
+       engine/shader/texture.c \
+			 engine/objects/ink/ink.c
 
 # Libraries to link with
 LIBS = -lglfw -lGL -lGLEW -lm -ldl
