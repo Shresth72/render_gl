@@ -5,6 +5,7 @@
 #include "uniform_map.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,6 +36,7 @@ void shader_set_uniform1i(Shader *shader, const char *name, int value);
 void shader_set_uniform1f(Shader *shader, const char *name, float value);
 void shader_set_uniform4f(Shader *shader, const char *name, float v0, float v1,
                           float v2, float v3);
+void shader_set_translation(Shader *shader, float x, float y);
 
 unsigned int util_load_shader(const char *vertexFilepath,
                               const char *fragmentFilepath);

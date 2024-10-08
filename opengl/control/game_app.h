@@ -36,6 +36,8 @@ typedef struct {
 
   int mousePressed;
   double mouseX, mouseY;
+
+  float moveX, moveY;
 } GameApp;
 
 GameApp *game_app_create(GameAppCreateInfo *createInfo);

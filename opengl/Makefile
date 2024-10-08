@@ -8,7 +8,7 @@ SRCS = main.c control/game_app.c engine/engine.c engine/render/quadmesh.c \
        engine/buffers/vertex_array.c engine/buffers/vertex_buffer_layout.c \
        engine/render/uniform_map.c engine/render/shader.c \
        engine/render/texture.c \
-			 engine/objects/ink/ink.c
+			 engine/objects/ink/ink.c engine/objects/tank/tank.c
 
 # Libraries to link with
 LIBS = -lglfw -lGL -lGLEW -lm -ldl

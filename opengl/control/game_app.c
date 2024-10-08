@@ -81,6 +81,8 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
   GLCall(app->lastTime = glfwGetTime());
   app->currentTime = app->lastTime;
   app->numFrames = 0;
+  app->moveX = 0.0f;
+  app->moveY = 0.0f;
 
   return app;
 }
@@ -92,8 +94,23 @@ returnCode game_app_main_loop(GameApp *app) {
   GLCall(glViewport(0, 0, app->width, app->height));
   GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+  // Arrow Keys
+
+  if (glfwGetKey(app->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    app->moveX = -0.01f;
+  } else if (glfwGetKey(app->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    app->moveX = 0.01f;
+  }
+
+  if (glfwGetKey(app->window, GLFW_KEY_UP) == GLFW_PRESS) {
+    app->moveY = 0.01f;
+  } else if (glfwGetKey(app->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    app->moveY = -0.01f;
+  }
+
+  // Engine Render
   engine_render(app->renderer, app->width, app->height, app->mousePressed,
-                app->mouseX, app->mouseY);
+                app->mouseX, app->mouseY, app->moveX, app->moveY);
 
   GLCall(glfwSwapBuffers(app->window));
   GLCall(glfwPollEvents());

@@ -101,6 +101,18 @@ int shader_get_uniform_location(Shader *shader, const char *name) {
   return location;
 }
 
+void shader_set_translation(Shader *shader, float x, float y) {
+  shader_bind(shader);
+
+  // Create a translation matrix using cglm or any matrix library
+  mat4 translation = GLM_MAT4_IDENTITY_INIT; // Initialize to identity matrix
+  glm_translate(translation, (vec4){x, y, 0.0f});
+
+  GLCall(
+      glUniformMatrix4fv(shader_get_uniform_location(shader, "u_Translation"),
+                         1, GL_FALSE, (const GLfloat *)translation));
+}
+
 // Load Shader Functions
 static char *load_shader_source(const char *filePath) {
   FILE *file = fopen(filePath, "r");

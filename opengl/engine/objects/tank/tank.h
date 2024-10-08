@@ -1,26 +1,19 @@
 #pragma once
-#include "../../../utils/errors.h"
-#include "../../buffers/index_buffer.h"
-#include "../../buffers/vertex_array.h"
+
+#include "../../render/quadmesh.h"
+#include "../../render/shader.h"
 #include "../../render/texture.h"
-#include "../../render/uniform_map.h"
-#include <GL/glew.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cglm/cglm.h>
 
 typedef struct {
-  IndexBuffer IBO;
-  unsigned int vertexCount;
+  QuadMesh *quadMesh;
+  Texture *texture;
+  Shader *shader;
 
-  VertexBuffer VBO;
-  float *vertices;
+  float currX, currY; // Tank position
+} TankObject;
 
-  VertexArray VAO;
-  VertexBufferLayout layout;
-
-  int currX, currY;
-} TankMesh;
-
-TankMesh *tankmesh_create(float w, float h);
-void tankmesh_destroy(TankMesh *quad);
-void tankmesh_render(TankMesh *quad);
+TankObject *tank_object_create();
+void tank_object_destroy(TankObject *obj);
+void tank_object_render(TankObject *obj);
+void tank_object_move(TankObject *obj, float offsetX, float offsetY);
