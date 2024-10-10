@@ -81,8 +81,6 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
   GLCall(app->lastTime = glfwGetTime());
   app->currentTime = app->lastTime;
   app->numFrames = 0;
-  app->moveX = 0.0f;
-  app->moveY = 0.0f;
 
   return app;
 }
@@ -90,27 +88,17 @@ GameApp *game_app_create(GameAppCreateInfo *createInfo) {
 returnCode game_app_main_loop(GameApp *app) {
   calculate_frame_rate(app);
 
-  GLCall(glfwGetCursorPos(app->window, &app->mouseX, &app->mouseY));
+  GLCall(glfwGetCursorPos(app->window, &app->renderer->mouseX,
+                          &app->renderer->mouseY));
+
   GLCall(glViewport(0, 0, app->width, app->height));
   GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
   // Arrow Keys
-
-  if (glfwGetKey(app->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    app->moveX = -0.01f;
-  } else if (glfwGetKey(app->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    app->moveX = 0.01f;
-  }
-
-  if (glfwGetKey(app->window, GLFW_KEY_UP) == GLFW_PRESS) {
-    app->moveY = 0.01f;
-  } else if (glfwGetKey(app->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    app->moveY = -0.01f;
-  }
+  handle_arrow_keys(app);
 
   // Engine Render
-  engine_render(app->renderer, app->width, app->height, app->mousePressed,
-                app->mouseX, app->mouseY, app->moveX, app->moveY);
+  engine_render(app->renderer, app->width, app->height, app->mousePressed);
 
   GLCall(glfwSwapBuffers(app->window));
   GLCall(glfwPollEvents());
@@ -181,6 +169,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   app->height = height;
 }
 
+// Interactions
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
   GLCall(GameApp *app = (GameApp *)glfwGetWindowUserPointer(window));
@@ -188,5 +177,22 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
     app->mousePressed = 1;
   } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
     app->mousePressed = 0;
+  }
+}
+
+void handle_arrow_keys(GameApp *app) {
+  app->renderer->moveX = 0.0f;
+  app->renderer->moveY = 0.0f;
+
+  if (glfwGetKey(app->window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    app->renderer->moveX = -0.01f;
+  } else if (glfwGetKey(app->window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    app->renderer->moveX = 0.01f;
+  }
+
+  if (glfwGetKey(app->window, GLFW_KEY_UP) == GLFW_PRESS) {
+    app->renderer->moveY = 0.01f;
+  } else if (glfwGetKey(app->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    app->renderer->moveY = -0.01f;
   }
 }

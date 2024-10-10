@@ -35,9 +35,6 @@ typedef struct {
   int numFrames;
 
   int mousePressed;
-  double mouseX, mouseY;
-
-  float moveX, moveY;
 } GameApp;
 
 GameApp *game_app_create(GameAppCreateInfo *createInfo);
@@ -46,7 +43,10 @@ void game_app_destroy(GameApp *app);
 
 GLFWwindow *make_window(int width, int height);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void mouse_button_callback(GLFWwindow *window, int button, int action,
-                           int mods);
 void calculate_frame_rate(GameApp *app);
 int send_message_to_server(const char *message);
+
+// Interactions
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods);
+void handle_arrow_keys(GameApp *app);

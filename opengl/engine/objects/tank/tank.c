@@ -10,15 +10,16 @@ TankObject *tank_object_create() {
   tankObj->currY = 0.0f;
 
   float vertices[] = {
-      -0.125f, -0.125f, 0.0f, 0.0f, // Bottom-left
-      0.125f,  -0.125f, 1.0f, 0.0f, // Bottom-right
-      0.125f,  0.125f,  1.0f, 1.0f, // Top-right
-      -0.125f, 0.125f,  0.0f, 1.0f  // Top-left
+      // x      y        texCoordX texCoordY
+      -0.125f, -0.18f, 0.0f, 0.0f, // Bottom-left
+      0.125f,  -0.18f, 1.0f, 0.0f, // Bottom-right
+      0.125f,  0.18f,  1.0f, 1.0f, // Top-right
+      -0.125f, 0.18f,  0.0f, 1.0f  // Top-left
   };
 
   unsigned int indices[] = {
-      0, 1, 2, //
-      2, 3, 0, //
+      0, 1, 2, // First triangle
+      2, 3, 0  // Second triangle
   };
 
   size_t vertexCount = sizeof(vertices) / sizeof(vertices[0]);
