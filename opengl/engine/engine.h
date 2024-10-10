@@ -21,6 +21,8 @@ typedef struct {
 
   double mouseX, mouseY;
   float moveX, moveY;
+
+  int spacePressed;
 } Engine;
 
 Engine *engine_create(int width, int height, const char *fontPath);

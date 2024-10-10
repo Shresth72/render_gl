@@ -94,8 +94,11 @@ returnCode game_app_main_loop(GameApp *app) {
   GLCall(glViewport(0, 0, app->width, app->height));
   GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  // Arrow Keys
+  // Handle Arrows
   handle_arrow_keys(app);
+
+  // Jump Handle
+  handle_jump(app);
 
   // Engine Render
   engine_render(app->renderer, app->width, app->height, app->mousePressed);
@@ -194,5 +197,13 @@ void handle_arrow_keys(GameApp *app) {
     app->renderer->moveY = 0.01f;
   } else if (glfwGetKey(app->window, GLFW_KEY_DOWN) == GLFW_PRESS) {
     app->renderer->moveY = -0.01f;
+  }
+}
+
+void handle_jump(GameApp *app) {
+  if (glfwGetKey(app->window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    app->renderer->spacePressed = 1;
+  } else {
+    app->renderer->spacePressed = 0;
   }
 }

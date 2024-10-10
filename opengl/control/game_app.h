@@ -50,3 +50,4 @@ int send_message_to_server(const char *message);
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods);
 void handle_arrow_keys(GameApp *app);
+void handle_jump(GameApp *app);
