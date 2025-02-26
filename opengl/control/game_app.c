@@ -159,7 +159,8 @@ void calculate_frame_rate(GameApp *app) {
   GLCall(app->currentTime = glfwGetTime());
   app->numFrames++;
   if (app->currentTime - app->lastTime >= 1.0) {
-    printf("%f ms/frame\n", 1000.0 / (double)app->numFrames);
+    printf("\r%f ms/frame", 1000.0 / (double)app->numFrames);
+    fflush(stdout);
     app->numFrames = 0;
     app->lastTime += 1.0;
   }
