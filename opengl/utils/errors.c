@@ -1,4 +1,4 @@
-#include "errors.h"
+#include "utils.h"
 
 void gl_clear_error() {
   while (glGetError() != GL_NO_ERROR)

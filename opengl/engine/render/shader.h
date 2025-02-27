@@ -1,5 +1,5 @@
 #pragma once
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include "quadmesh.h"
 #include "texture.h"
 #include "uniform_map.h"
@@ -24,8 +24,11 @@ typedef struct {
   float r, increment, prevR;
 } Shader;
 
-Shader *shader_create(const char *vertexPath, const char *fragmentPath,
-                      QuadMesh *quad, Texture *texture);
+Shader *shader_create_with_texture(const char *vertexPath,
+                                   const char *fragmentPath, QuadMesh *quad,
+                                   Texture *texture);
+Shader *shader_create_with_color(const char *vertexPath,
+                                 const char *fragmentPath, QuadMesh *quad);
 void shader_destroy(Shader *shader);
 void shader_render(Shader *shader);
 void shader_bind(Shader *shader);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 

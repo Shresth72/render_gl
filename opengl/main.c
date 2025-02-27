@@ -8,7 +8,7 @@ int main() {
   appInfo.width = width;
   appInfo.height = height;
   appInfo.fontPath =
-      "/home/shres/projects/render_gl/opengl/nanovg/fonts/Meditative.ttf";
+      "/home/shres/c_projects/render_gl/opengl/nanovg/fonts/Meditative.ttf";
   GameApp *app = game_app_create(&appInfo);
 
   returnCode nextAction = CONTINUE;

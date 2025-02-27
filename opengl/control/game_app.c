@@ -1,4 +1,5 @@
 #include "game_app.h"
+#include <stdio.h>
 
 int send_message_to_server(const char *message) {
   int sockfd;
@@ -159,7 +160,7 @@ void calculate_frame_rate(GameApp *app) {
   GLCall(app->currentTime = glfwGetTime());
   app->numFrames++;
   if (app->currentTime - app->lastTime >= 1.0) {
-    printf("\r%f ms/frame", 1000.0 / (double)app->numFrames);
+    printf("\rFPS: %d", app->numFrames);
     fflush(stdout);
     app->numFrames = 0;
     app->lastTime += 1.0;

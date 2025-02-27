@@ -1,6 +1,6 @@
 #pragma once
 #include "../../../nanovg/src/stb_image.h"
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include <stdlib.h>
 
 typedef struct {

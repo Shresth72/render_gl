@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include "vertex_buffer.h"
 #include "vertex_buffer_layout.h"
 #include <GL/glew.h>

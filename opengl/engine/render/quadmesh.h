@@ -1,5 +1,5 @@
 #pragma once
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include "../buffers/index_buffer.h"
 #include "../buffers/vertex_array.h"
 #include <GL/glew.h>

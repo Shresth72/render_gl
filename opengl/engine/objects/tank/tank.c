@@ -5,18 +5,9 @@ TankObject *tank_object_create() {
   if (!tankObj)
     return NULL;
 
-  float vertices[] = {
-      // x      y        texCoordX texCoordY
-      -0.125f, -0.25f, 0.0f, 0.0f, // Bottom-left
-      0.125f,  -0.25f, 1.0f, 0.0f, // Bottom-right
-      0.125f,  0.25f,  1.0f, 1.0f, // Top-right
-      -0.125f, 0.25f,  0.0f, 1.0f  // Top-left
-  };
-
-  unsigned int indices[] = {
-      0, 1, 2, // First triangle
-      2, 3, 0  // Second triangle
-  };
+  float vertices[16];
+  unsigned int indices[6];
+  get_vertices16(vertices, indices, 0.25f, 0.5f, 1.0f, 1.0f);
 
   size_t vertexCount = sizeof(vertices) / sizeof(vertices[0]);
   size_t indexCount = sizeof(indices) / sizeof(indices[0]);
@@ -35,9 +26,9 @@ TankObject *tank_object_create() {
     return NULL;
   }
 
-  tankObj->shader =
-      shader_create("shaders/tank/vertex.glsl", "shaders/tank/fragment.glsl",
-                    tankObj->quadMesh, tankObj->texture);
+  tankObj->shader = shader_create_with_texture(
+      "shaders/tank/vertex.glsl", "shaders/tank/fragment.glsl",
+      tankObj->quadMesh, tankObj->texture);
   if (!tankObj->shader) {
     texture_destroy(tankObj->texture);
     quadmesh_destroy(tankObj->quadMesh);
@@ -57,11 +48,6 @@ void tank_object_destroy(TankObject *tankObj) {
     quadmesh_destroy(tankObj->quadMesh);
     free(tankObj);
   }
-}
-
-void tank_object_render(TankObject *tankObj) {
-  shader_set_translation(tankObj->shader, tankObj->currX, tankObj->currY);
-  shader_render(tankObj->shader);
 }
 
 void tank_object_move(TankObject *tankObj, float offsetX, float offsetY,
@@ -94,6 +80,13 @@ void tank_object_move(TankObject *tankObj, float offsetX, float offsetY,
       tankObj->currY += offsetY;
     }
   }
+}
+
+void tank_object_render(TankObject *tankObj, float offsetX, float offsetY,
+                        int spacePressed) {
+  shader_render(tankObj->shader);
+  shader_set_translation(tankObj->shader, tankObj->currX, tankObj->currY);
+  tank_object_move(tankObj, offsetX, offsetY, spacePressed);
 }
 
 void initialize_tank_defaults(TankObject *tankObj) {

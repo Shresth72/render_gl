@@ -1,5 +1,5 @@
 #pragma once
-#include "../../utils/errors.h"
+#include "../../utils/utils.h"
 #include <GL/glew.h>
 #include <stdlib.h>
 

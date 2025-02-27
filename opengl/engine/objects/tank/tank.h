@@ -25,9 +25,8 @@ TankObject *tank_object_create();
 void initialize_tank_defaults(TankObject *tankObj);
 
 void tank_object_destroy(TankObject *obj);
-void tank_object_render(TankObject *obj);
-void tank_object_move(TankObject *obj, float offsetX, float offsetY,
-                      int spacePressed);
+void tank_object_render(TankObject *obj, float offsetX, float offsetY,
+                        int spacePressed);
 
 float calculate_quad_width(float *vertices);
 float calculate_quad_height(float *vertices);

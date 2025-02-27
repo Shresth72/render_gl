@@ -6,11 +6,7 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath,
   shader->shaderId = 0;
   shader->uniformMap = uniform_create_hashmap();
 
-  // Init Texture and Shader
-  if (texture != NULL) {
-    shader->texture = texture;
-  }
-
+  // Load Shader Files
   shader->shaderId = util_load_shader(vertexPath, fragmentPath);
   if (shader->shaderId == 0) {
     free(shader);
@@ -22,12 +18,14 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath,
 
   // Bind Shader
   shader_bind(shader);
-  // shader_set_uniform4f(shader, "u_Color", 0.6f, 0.2f, 0.5, 1.0f);
 
   // Bind Texture
-  if (shader->texture != NULL) {
+  if (texture != NULL) {
+    shader->texture = texture;
     texture_bind(shader->texture, 0);
     shader_set_uniform1i(shader, "u_Texture", 0);
+  } else {
+    shader_set_uniform4f(shader, "u_Color", 0.6f, 0.2f, 0.5, 1.0f);
   }
 
   // Set the QuadMesh
@@ -38,6 +36,17 @@ Shader *shader_create(const char *vertexPath, const char *fragmentPath,
   shader->increment = 0.05f;
 
   return shader;
+}
+
+Shader *shader_create_with_texture(const char *vertexPath,
+                                   const char *fragmentPath, QuadMesh *quad,
+                                   Texture *texture) {
+  return shader_create(vertexPath, fragmentPath, quad, texture);
+}
+
+Shader *shader_create_with_color(const char *vertexPath,
+                                 const char *fragmentPath, QuadMesh *quad) {
+  return shader_create(vertexPath, fragmentPath, quad, NULL);
 }
 
 void shader_destroy(Shader *shader) {
